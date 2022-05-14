@@ -13,22 +13,11 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 
-
-
 interface IFormInput {
   modPath: string;
   modId: string;
   changelogFile: string;
 }
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-}));
-
 
 const PublishModForm = () => {
   const { control, handleSubmit } = useForm<IFormInput>();
@@ -42,7 +31,7 @@ const PublishModForm = () => {
     } = data;
 
     console.log(
-      `.\PublisherCmd.exe update /id:${modId} /changeNoteFile:"${changelogFile}" /path:"${modPath}" [/nologo] [/nosummary]`
+      `.\\PublisherCmd.exe update /id:${modId} /changeNoteFile:"${changelogFile}" /path:"${modPath}" [/nologo] [/nosummary]`
     )
   };
 
@@ -92,7 +81,7 @@ const PublishModForm = () => {
               <Grid item xs={8} style={{display:"flex",justifyContent:'space-between'}}>
                 <Button variant="contained" type="submit">Publish</Button>
                 <Link to="/Settings" style={{"textDecoration":"none"}}>
-                    <Button variant="contained" color='secondary' disabled>Settings</Button>
+                    <Button variant="contained" color='secondary'>Settings</Button>
                 </Link>
               </Grid>
             </React.Fragment>
