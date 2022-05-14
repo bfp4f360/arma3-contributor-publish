@@ -34,7 +34,16 @@ const PublishModForm = () => {
   const { control, handleSubmit } = useForm<IFormInput>();
 
   const onSubmit: SubmitHandler<IFormInput> = data => {
-    console.log(data)
+    console.log(data);
+    let {
+      changelogFile,
+      modId,
+      modPath
+    } = data;
+
+    console.log(
+      `.\PublisherCmd.exe update /id:${modId} /changeNoteFile:"${changelogFile}" /path:"${modPath}" [/nologo] [/nosummary]`
+    )
   };
 
   return (
