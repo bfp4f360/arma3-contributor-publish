@@ -9,27 +9,33 @@ import Settings from './routes/settings';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import theme from "./theme/theme";
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
 root.render(
 	<React.StrictMode>
-	<BrowserRouter>
-		<Routes>
-		<Route path="/" element=
-			{
-				<App />
-			} 
-		/>
-		<Route path="settings" element= 
-			{
-				<Settings />
-			} 
-		/>
-		</Routes>
-		
-	</BrowserRouter>
+		<ThemeProvider theme={theme}>
+		<CssBaseline/>
+		<BrowserRouter>
+			<Routes>
+			<Route path="/" element=
+				{
+					<App />
+				} 
+			/>
+			<Route path="settings" element= 
+				{
+					<Settings />
+				} 
+			/>
+			</Routes>
+			
+		</BrowserRouter>
+		</ThemeProvider>
 	</React.StrictMode>
 );
 
