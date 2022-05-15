@@ -1,10 +1,10 @@
 import React from "react";
 
-export default function MainPage() {
+export default function SettingsPage() {
   return (
     <React.Fragment>
       <div>
-        Main
+        Settings
       </div>
     </React.Fragment>
   );
