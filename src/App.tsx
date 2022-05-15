@@ -8,6 +8,8 @@ import {
   BrowserRouter as Router,
 } from "react-router-dom";
 
+import AppShell from './components/AppShell'
+import {views} from './data/views'
 
 export default function App() {
   const myTheme: MantineThemeOverride = {
@@ -18,7 +20,7 @@ export default function App() {
     <React.Fragment>
       <Router>
       <MantineProvider theme={myTheme} withGlobalStyles withNormalizeCSS>
-
+        <AppShell views={views}/>
       </MantineProvider>
       </Router>
     </React.Fragment>

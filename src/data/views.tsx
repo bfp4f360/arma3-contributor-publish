@@ -1,23 +1,31 @@
 // Component views
-import MainPage from "../routes/main"
-import SettingsPage from "../routes/settings"
+import MainPage from "../views/publish"
+import SettingsPage from "../views/settings"
 
 // Icons
 import { Settings,Upload } from 'tabler-icons-react';
 
-export const views = [
+export const views: viewType[] = [
     {
         displayName: "Publish",
-        path:"/",
+        path:"/views/publish",
         leftIcon: <Upload />,
         component: <MainPage />,
-        color: 'indigo'
+        color: 'yellow'
     },
     {
         displayName: "Settings",
-        path:"/settings",
+        path:"/views/settings",
         leftIcon: <Settings />,
         component: <SettingsPage />,
-        color:'yellow'
+        color:'green'
     }
 ]
+
+export interface viewType {
+    displayName: string;
+    path: string;
+    leftIcon: JSX.Element;
+    component: JSX.Element;
+    color: string;
+}
