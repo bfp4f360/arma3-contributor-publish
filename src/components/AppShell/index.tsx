@@ -1,17 +1,20 @@
 import {viewType} from '../../data/views'
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   AppShell,
   Footer,
   Aside,
   Text,
   MediaQuery,
+  Title,
 } from '@mantine/core';
 
 
 import NavbarShell from './navbar'
 import Body from './body'
 import HeaderShell from './header'
+import SideBar from './sidebar'
+import { ProjectContext } from '../../data/context';
 
 type propsType = {
   views?: viewType[]
@@ -20,7 +23,8 @@ type propsType = {
 export default function App(props: propsType) {
   let {views=[]} = props
   const [opened, setOpened] = useState(false);
-
+  let {presetData,setPresetData} = (useContext(ProjectContext));
+  
   return (
     <AppShell
       navbarOffsetBreakpoint="sm"
@@ -32,13 +36,14 @@ export default function App(props: propsType) {
       aside={
         <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
           <Aside p="md" hiddenBreakpoint="sm" width={{ sm: 200, lg: 300 }}>
-            <Text>{`Application sidebar ==>`}</Text>
+            {/* <Text>{`Application sidebar ==>`}</Text> */}
+            <SideBar views={views}/>
           </Aside>
         </MediaQuery>
       }
       footer={
         <Footer height={60} p="md">
-          Application footer
+         <Title order={5}><Text color="blue" inherit component="span">{presetData.selectedPreset.presetName} </Text>Publisher Preset Selected</Title>;
         </Footer>
       }
       header={

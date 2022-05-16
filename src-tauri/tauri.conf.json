@@ -82,7 +82,7 @@
       {
         "fullscreen": false,
         "height": 600,
-        "resizable": true,
+        "resizable": false,
         "title": "Arma 3 Contributor Publisher",
         "width": 1200
       }
