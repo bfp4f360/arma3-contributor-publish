@@ -13,9 +13,12 @@
   "tauri": {
     "allowlist": {
       "all": true,
-      "path": { "all": true },
-      "fs": {"all": true},
-      "dialog": { "all": true },
+      "fs": {
+        "scope": {
+          "allow": ["$APP/db/**", "$DOWNLOAD/**", "$RESOURCE/**"],
+          "deny": ["$APP/db/*.stronghold"]
+        }
+      },
       "shell": {
         "scope": [
           {
@@ -25,7 +28,16 @@
           }
         ]
       },
-      "protocol":{"all": true}
+      "protocol": {
+        "asset": true,
+        "assetScope": {
+          "allow": ["$APP/db/**", "$RESOURCE/**"],
+          "deny": ["$APP/db/*.stronghold"]
+        }
+      },
+      "http": {
+        "scope": ["http://localhost:3003"]
+      }
     },
     "bundle": {
       "active": true,

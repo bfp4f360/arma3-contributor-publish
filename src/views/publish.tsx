@@ -15,13 +15,9 @@ import { Title } from '@mantine/core';
 import { Divider } from '@mantine/core';
 import { Center } from '@mantine/core';
 
-import { useRef } from 'react';
 import { open as testOpen} from "@tauri-apps/api/dialog";
 
 import { Command } from '@tauri-apps/api/shell'
-
-const windows = navigator.userAgent.includes('Windows')
-let cmd = windows ? 'cmd' : 'sh'
 
 export default function MainPage() {
   // Form data to validate and initial values
@@ -48,24 +44,22 @@ export default function MainPage() {
   });
 
   const handleSubmit = async (values: typeof form.values) => {
-    // console.log(values)
-    // let commandExample = `D:\\SteamLibrary\\steamapps\\common\\Arma 3 Tools\\Publisher\\PublisherCmd.exe update /id:${values.modId} /changeNoteFile:"${values.modChangelogFile}" /path:"${values.modAddonsPath}" [/nologo] [/nosummary]`
-    // let args = [
-    //   "update",
-    //   `/id:${values.modId}`,
-    //   `/changeNoteFile:"${values.modChangelogFile}"`,
-    //   `/path:"${values.modAddonsPath}"`,
-    //   "[/nologo] [/nosummary]"
-    // ]
+    //Create the command we will run to upload mod
+    let publisherCmd = 
+    `.\\PublisherCmd.exe update /id:${values.modId} /changeNoteFile:${values.modChangelogFile} /path:${values.modAddonsPath} [/nologo] [/nosummary]`
 
-    // console.log(commandExample)
-    // console.log(args)
-
-    console.log("Executing publish command.....",windows,'cmd',['/C'])
-    let executableCommand = new Command('cmd',['/C'])
-
-    let res = await executableCommand.execute();
-    console.log("res",res)
+    
+    const command = new Command("cmd", ["/C", publisherCmd], { cwd: "D:\\SteamLibrary\\steamapps\\common\\Arma 3 Tools\\Publisher"  })
+    
+    command.on('close', data => {
+      console.log(`command finished with code ${data.code} and signal ${data.signal}`)
+    })
+    command.on('error', error => console.log(`command error: "${error}"`))
+    command.stdout.on('data', line => console.log(`command stdout: "${line}"`))
+    command.stderr.on('data', line => console.log(`command stderr: "${line}"`))
+    
+    let result = await command.execute()
+    console.log(result)
   };
 
   let inputRef:any = React.useRef();
@@ -137,11 +131,9 @@ export default function MainPage() {
             />
 
             <Group position="left" mt="md">
-              <Button type="submit" color="yellow" variant="outline" onClick={()=>handleSubmit({ 
-      modChangelogFile: '', 
-      modAddonsPath: '',
-      modId: undefined 
-    })}>Update</Button>
+              <Button type="submit" color="yellow" variant="outline">
+                Update
+              </Button>
             </Group>
           </form>
         </Box>
