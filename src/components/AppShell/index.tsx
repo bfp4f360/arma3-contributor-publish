@@ -43,7 +43,7 @@ export default function App(props: propsType) {
       }
       footer={
         <Footer height={60} p="md">
-         <Title order={5}><Text color="blue" inherit component="span">{presetData.selectedPreset.presetName} </Text>Publisher Preset Selected</Title>;
+         <Title order={5}><Text color="blue" inherit component="span">{presetData.selectedPreset.presetName} </Text>Publisher Preset Selected</Title>
         </Footer>
       }
       header={
