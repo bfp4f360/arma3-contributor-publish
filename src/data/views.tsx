@@ -8,7 +8,7 @@ import { Settings,Upload } from 'tabler-icons-react';
 export const views: viewType[] = [
     {
         displayName: "Publish",
-        path:"/views/publish",
+        path:"/",
         leftIcon: <Upload />,
         component: <MainPage />,
         color: 'yellow'

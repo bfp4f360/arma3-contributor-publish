@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Ref } from "react";
 
 // To center the contents
 import { Container } from '@mantine/core';
@@ -15,21 +15,29 @@ import { Title } from '@mantine/core';
 import { Divider } from '@mantine/core';
 import { Center } from '@mantine/core';
 
+import { useRef } from 'react';
+import { open as testOpen} from "@tauri-apps/api/dialog";
+
+import { Command } from '@tauri-apps/api/shell'
+
+const windows = navigator.userAgent.includes('Windows')
+let cmd = windows ? 'cmd' : 'sh'
+
 export default function MainPage() {
   // Form data to validate and initial values
   const form = useForm<{ 
     modChangelogFile: string;
-    modAddons: string; 
+    modAddonsPath: string; 
     modId: number | undefined 
   }>({
     initialValues: { 
       modChangelogFile: '', 
-      modAddons: '',
+      modAddonsPath: '',
       modId: undefined 
     },
     validate: (values) => ({
       modChangelogFile: values.modChangelogFile.length < 1 ? 'Enter file path to changelog' : null,
-      modAddons: values.modAddons.length < 1 ? "Enter file path to addons folder of mod" : null,
+      modAddonsPath: values.modAddonsPath.length < 1 ? "Enter file path to addons folder of mod" : null,
       modId:
         values.modId === undefined
           ? 'Please enter Steam Workshop mod ID, found in URL'
@@ -39,7 +47,29 @@ export default function MainPage() {
     }),
   });
 
-  const handleSubmit = (values: typeof form.values) => console.log(values);
+  const handleSubmit = async (values: typeof form.values) => {
+    // console.log(values)
+    // let commandExample = `D:\\SteamLibrary\\steamapps\\common\\Arma 3 Tools\\Publisher\\PublisherCmd.exe update /id:${values.modId} /changeNoteFile:"${values.modChangelogFile}" /path:"${values.modAddonsPath}" [/nologo] [/nosummary]`
+    // let args = [
+    //   "update",
+    //   `/id:${values.modId}`,
+    //   `/changeNoteFile:"${values.modChangelogFile}"`,
+    //   `/path:"${values.modAddonsPath}"`,
+    //   "[/nologo] [/nosummary]"
+    // ]
+
+    // console.log(commandExample)
+    // console.log(args)
+
+    console.log("Executing publish command.....",windows,'cmd',['/C'])
+    let executableCommand = new Command('cmd',['/C'])
+
+    let res = await executableCommand.execute();
+    console.log("res",res)
+  };
+
+  let inputRef:any = React.useRef();
+
   return (
     <React.Fragment>
       <Container size="xs" px="xs">
@@ -56,7 +86,20 @@ export default function MainPage() {
               label="Mod Changelog File" 
               placeholder="..." {...form.getInputProps('modChangelogFile')} 
               rightSection={
-                <ActionIcon onClick={()=>{console.log("open folder explorer")}}>
+                <ActionIcon onClick={
+                    async () => {
+                      let filePath = await testOpen({
+                        multiple:false,
+                      })
+                      
+
+                      if(!filePath) {return}
+                      filePath = filePath as string;
+
+                      form.setFieldValue('modChangelogFile', filePath)
+                    }
+                  }
+                >
                   <Folder />
                 </ActionIcon>
               }
@@ -65,9 +108,23 @@ export default function MainPage() {
             <TextInput 
               label="Mod Addons Folder" 
               placeholder="..." 
-              {...form.getInputProps('modAddons')} 
+              {...form.getInputProps('modAddonsPath')} 
               rightSection={
-                <ActionIcon onClick={()=>{console.log("open folder explorer")}}>
+                <ActionIcon onClick={
+                    async () => {
+                      let filePath = await testOpen({
+                        multiple:false,
+                        directory:true
+                      })
+                      
+
+                      if(!filePath) {return}
+                      filePath = filePath as string;
+
+                      form.setFieldValue('modAddonsPath', filePath)
+                    }
+                  }
+                >
                   <Folder />
                 </ActionIcon>
               }
@@ -80,7 +137,11 @@ export default function MainPage() {
             />
 
             <Group position="left" mt="md">
-              <Button type="submit" color="yellow" variant="outline">Update</Button>
+              <Button type="submit" color="yellow" variant="outline" onClick={()=>handleSubmit({ 
+      modChangelogFile: '', 
+      modAddonsPath: '',
+      modId: undefined 
+    })}>Update</Button>
             </Group>
           </form>
         </Box>
