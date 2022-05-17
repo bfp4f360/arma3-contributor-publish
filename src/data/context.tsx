@@ -1,28 +1,78 @@
 import React, { useState, Dispatch } from 'react'
+import { BaseDirectory, createDir, readTextFile, writeFile } from "@tauri-apps/api/fs";
 
-//@TODO: Have settings and persistent storage working.
-let DefaultData = {
-    "selectedPreset":{
-        presetName: 'Dev Mod',
-        modChangelogFile: 'C:\\Users\\namenai\\Desktop\\changelog1.txt', 
-        modFolderPath: 'C:\\Users\\namenai\\Desktop\\StagingMod',
-        modId: 2182968046 
-    },
-    "savedPresets":[
+const APP_DATA_DIR = BaseDirectory.App
+const APP_DATA_JSON = "presets.json";
+const app_constants = {
+    APP_DATA_DIR,
+    APP_DATA_JSON
+}
+const createDataFolder = async () => {
+  try {
+    let res = await createDir("tauri_folder", {
+      dir: APP_DATA_DIR,
+      recursive: true,
+    });
+    return true;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+};
+
+const saveDataFile = async (contents: Object, path: string) => {
+    try {
+      await writeFile(
         {
-            presetName: 'Dev Mod',
-            modChangelogFile: 'C:\\Users\\namenai\\Desktop\\changelog1.txt', 
-            modFolderPath: 'C:\\Users\\namenai\\Desktop\\StagingMod',
-            modId: 2182968046 
+          contents: JSON.stringify(contents),
+          path: path,
         },
         {
-            presetName: 'Dev Mod2',
-            modChangelogFile: 'C:\\Users\\namenai\\Desktop\\changelog2.txt', 
-            modFolderPath: 'C:\\Users\\namenai\\Desktop\\StagingMod',
-            modId: 2182968046 
+          dir: APP_DATA_DIR,
         }
-    ]
+      );
+    } catch (e) {
+      console.log(e);
+    }
+};
+
+const readDataFile:any = async (path: string) => {
+    try {
+        let res = await readTextFile(path, {
+            dir: APP_DATA_DIR,
+        });
+        return res;
+    } catch (e) {
+        console.error(e);
+        return {};
+    }
 }
+
+interface IPresetData {
+    selectedPreset: {
+        presetName: string;
+        modChangelogFile: string;
+        modFolderPath: string;
+        modId: number;
+    };
+    savedPresets: {
+        presetName: string;
+        modChangelogFile: string;
+        modFolderPath: string;
+        modId: number;
+    }[]
+}
+//@TODO: Have settings and persistent storage working.
+let DefaultData:IPresetData = {
+    selectedPreset: {
+        presetName: '',
+        modChangelogFile: '',
+        modFolderPath: '',
+        modId: 0
+    },
+    savedPresets: []
+}
+
 const ProjectContext = 
 React.createContext<{
     presetData: typeof DefaultData
@@ -32,9 +82,11 @@ React.createContext<{
     setPresetData: ()=>{}
 })
 
-// const defaultContext = 
-
 export {
+    app_constants,
     ProjectContext,
-    DefaultData
+    DefaultData,
+    createDataFolder,
+    saveDataFile,
+    readDataFile
 }

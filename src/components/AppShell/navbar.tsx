@@ -34,6 +34,7 @@ export default function NavbarShell(props: propsType) {
             } 
             style={{display:'flex',justifyContent:'left'}}
             component={Link} to={page.path}
+            disabled={true}
         >
             {page.displayName}
         </Button>

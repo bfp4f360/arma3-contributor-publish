@@ -22,11 +22,11 @@ function GenView(): JSX.Element {
         <Chips 
             color="blue" 
             variant="outline" 
-            defaultValue={presetData.selectedPreset.presetName}
+            defaultValue={presetData?.selectedPreset?.presetName || ""}
             onChange={
                 (val)=>{
                     let matched = presetData.savedPresets.find(item => {
-                        return item.presetName == val
+                        return item?.presetName == val
                     })
                     if(matched) {
                         setPresetData({

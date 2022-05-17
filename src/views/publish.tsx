@@ -16,14 +16,21 @@ import { Divider } from '@mantine/core';
 import { Center } from '@mantine/core';
 
 import { open as fileExplorerOpen} from "@tauri-apps/api/dialog";
-
+import { Code } from '@mantine/core';
 import { Command } from '@tauri-apps/api/shell'
+import { Loader } from '@mantine/core';
 
-import {ProjectContext} from '../data/context'
+import {ProjectContext,DefaultData,saveDataFile,readDataFile,app_constants} from '../data/context'
+
+
 
 export default function MainPage() {
   let {presetData,setPresetData} = (useContext(ProjectContext));
 
+  let [consoleOutput, setConsoleOutput] = (useState([{
+    text:"",
+    color:""
+  }]))
   const [visible, setVisible] = useState(false);
   
   // Form data to validate and initial values
@@ -48,13 +55,14 @@ export default function MainPage() {
   }>({
     initialValues: initialValues,
     validate: (values) => ({
+      presetName: values.presetName.length < 1 ? 'Enter preset name' : null,
       modChangelogFile: values.modChangelogFile.length < 1 ? 'Enter file path to changelog' : null,
       modFolderPath: values.modFolderPath.length < 1 ? "Enter file path to addons folder of mod" : null,
       modId:
         values.modId === undefined
           ? 'Please enter Steam Workshop mod ID, found in URL'
-          : values.modId < 0
-          ? "Pretty sure Steam Workshop mod ID's cant be negative"
+          : values.modId < 1
+          ? "Pretty sure Steam Workshop mod ID cant be 0 or less"
           : null,
     }),
   });
@@ -62,6 +70,13 @@ export default function MainPage() {
   //console.log(presetData.selectedPreset.presetName,' vs ',formData.getInputProps("presetName").value)
 
   const handleSubmit = async (values: typeof formData.values) => {
+    consoleOutput = [{
+      text:"",
+      color:""
+    }]
+    setConsoleOutput(consoleOutput)
+
+    // return
     //Create the command we will run to upload mod
     //@TODO: Have settings and persistent storage working.
     let publisherCmd = 
@@ -78,8 +93,22 @@ export default function MainPage() {
       console.log(`command error: "${error}"`) 
       setVisible(false)
     })
-    command.stdout.on('data', line => console.log(`command stdout: "${line}"`))
-    command.stderr.on('data', line => console.log(`command stderr: "${line}"`))
+    command.stdout.on('data',   (line) => {
+      let newLine = {
+        text:`"${line}"`,
+        color:"gray"
+      } 
+      RenderNewOutput(newLine)
+      consoleOutput.push(newLine)
+    })
+    command.stderr.on('data', (line) => {
+      let newLine = {
+        text:`"${line}"`,
+        color:"red"
+      } 
+      RenderNewOutput(newLine)
+      consoleOutput.push(newLine)
+    })
     
     setVisible(true)
     let result = await command.execute()
@@ -87,14 +116,39 @@ export default function MainPage() {
     //console.log(result)
   };
 
-  const handleSave = () => {
-    let keys = Object.keys(initialValues);
-    let saveData:any = initialValues
+  function RenderNewOutput(newLine:any) {
+    setConsoleOutput([
+      ...consoleOutput,
+      newLine
+    ])
+  }
+  const handleSave = async () => {
+    try {
+      // First validate
+      let validationRes = formData.validate();
+      if(validationRes.hasErrors) {
+        throw validationRes
+      }
 
-    keys.forEach((key:any)=>{
-      saveData[key] = formData.getInputProps(key)
-    })
-    console.log('Saving data: ',saveData)
+      // Get the data
+      let keys = Object.keys(initialValues);
+      let saveData:any = initialValues
+
+      keys.forEach((key:any)=>{
+        saveData[key] = formData.getInputProps(key).value
+      })
+      console.log('Saving data: ',saveData)
+
+      //Save the data
+      let currentData = JSON.parse(await readDataFile(app_constants.APP_DATA_JSON)) as typeof DefaultData 
+      currentData.savedPresets.push(saveData);
+      saveDataFile(currentData,app_constants.APP_DATA_JSON)
+      setPresetData(currentData)
+
+    } catch (e) {
+      console.error(e);
+      saveDataFile(DefaultData,app_constants.APP_DATA_JSON) // Reset just incase?
+    }
   }
 
   useEffect(() => {
@@ -106,6 +160,27 @@ export default function MainPage() {
     })
 
   }, [presetData])
+
+  function getConsoleOutputBody() {
+    //console.log("Gen body",consoleOutput)
+    if(consoleOutput.length == 1 && consoleOutput[0].text == "") {
+      return (
+        <Code color="yellow">
+          Publisher Output...
+        </Code>
+      )
+    }
+    return (
+      <React.Fragment>
+        {
+          consoleOutput.map((val,index) => <div key={index}><Code color={val.color}>{val.text}</Code></div>)
+          // consoleOutput.map((line,index)=>{
+          //   <Code color={line.color}>{line.text}</Code>
+          // })
+        }
+      </React.Fragment>
+    )
+  }
 
   return (
     <React.Fragment>
@@ -119,8 +194,9 @@ export default function MainPage() {
         <Divider my="sm" />
 
         <Box sx={{ maxWidth: 320 }} mx="auto">
-          <LoadingOverlay visible={visible} />
+          
           <form onSubmit={formData.onSubmit(handleSubmit)} >
+            {/* <LoadingOverlay visible={visible}/> */}
             <TextInput 
               label="Preset" 
               placeholder="..." {...formData.getInputProps('presetName')} 
@@ -180,13 +256,19 @@ export default function MainPage() {
             <div>
               <Group position="apart" mt="md">
                 <Group position="left" mt="md">
-                  <Button type="submit" color="yellow" variant="outline">
+                  <Button 
+                    type="submit" color="yellow" variant="outline" disabled={visible}
+                    leftIcon={ visible? <Loader size="sm"/>: <></>}
+                  >
                     Update
                   </Button>
                 </Group>
                 <Group position="right" mt="md">
-                  <Button color="green" variant="outline" onClick={handleSave}>
-                    Save as Preset
+                  <Button 
+                    color="green" variant="outline" onClick={handleSave} disabled={visible}
+                    leftIcon={ visible? <Loader size="sm"/>: <></>}
+                  >
+                    Save Preset
                   </Button>
               </Group>
               </Group>
@@ -196,6 +278,9 @@ export default function MainPage() {
         </Box>
 
         <Divider my="sm" />
+        <Code block>{
+          getConsoleOutputBody()
+        }</Code>
       </Box>
       </Container>
     </React.Fragment>
