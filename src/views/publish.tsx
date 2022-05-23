@@ -25,7 +25,7 @@ import {ProjectContext,DefaultData,saveDataFile,readDataFile,app_constants} from
 
 
 export default function MainPage() {
-  let {presetData,setPresetData} = (useContext(ProjectContext));
+  let {presetData,setPresetData,settingsData} = (useContext(ProjectContext));
 
   let [consoleOutput, setConsoleOutput] = (useState([{
     text:"",
@@ -81,9 +81,15 @@ export default function MainPage() {
     //@TODO: Have settings and persistent storage working.
     let publisherCmd = 
     `.\\PublisherCmd.exe update /id:${values.modId} /changeNoteFile:${values.modChangelogFile} /path:${values.modFolderPath} [/nologo] [/nosummary]`
-
     
-    const command = new Command("cmd", ["/C", publisherCmd], { cwd: "D:\\SteamLibrary\\steamapps\\common\\Arma 3 Tools\\Publisher"  })
+    // console.log("Generated Command:",publisherCmd)
+    // console.log("At folder:",settingsData.arma3ToolsPath)
+
+    if (settingsData.arma3ToolsPath === '') {
+      return;
+    }
+
+    const command = new Command("cmd", ["/C", publisherCmd], { cwd: `${settingsData.arma3ToolsPath}\\Publisher`  })
     
     command.on('close', data => {
       console.log(`command finished with code ${data.code} and signal ${data.signal}`)

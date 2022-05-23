@@ -12,7 +12,7 @@ import {
 // React stuff
 import AppShell from './components/AppShell'
 import {views} from './data/views'
-import {ProjectContext,DefaultData,readDataFile,app_constants,DefaultSettings} from './data/context'
+import {ProjectContext,DefaultData,saveDataFile,readDataFile,app_constants,DefaultSettings} from './data/context'
 
 
 export default function App() {
@@ -37,18 +37,20 @@ export default function App() {
       } catch (e) {
         console.error(e);
         setPresetData(DefaultData)
+        saveDataFile(DefaultData,app_constants.APP_DATA_JSON)
       }
     })
 
     // read the settings.json file
-    // readDataFile(app_constants.APP_SETTINGS_JSON).then((value: string)=>{
-    //   try {
-    //     setSettingsData(JSON.parse(value as string))
-    //   } catch (e) {
-    //     console.error(e);
-    //     setSettingsData(DefaultSettings)
-    //   }
-    // })
+    readDataFile(app_constants.APP_SETTINGS_JSON).then((value: string)=>{
+      try {
+        setSettingsData(JSON.parse(value as string))
+      } catch (e) {
+        console.error(e); 
+        setSettingsData(DefaultSettings)
+        saveDataFile(DefaultSettings,app_constants.APP_SETTINGS_JSON)
+      }
+    })
   },[])
 
   return (
