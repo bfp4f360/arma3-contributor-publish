@@ -3,10 +3,15 @@ import { BaseDirectory, createDir, readTextFile, writeFile } from "@tauri-apps/a
 
 const APP_DATA_DIR = BaseDirectory.App
 const APP_DATA_JSON = "presets.json";
+const APP_SETTINGS_JSON = "settings.json";
+
 const app_constants = {
     APP_DATA_DIR,
-    APP_DATA_JSON
+    APP_DATA_JSON,
+    APP_SETTINGS_JSON
 }
+
+// Functions to read/write data
 const createDataFolder = async () => {
   try {
     let res = await createDir("tauri_folder", {
@@ -48,6 +53,7 @@ const readDataFile:any = async (path: string) => {
     }
 }
 
+// Preset Data
 interface IPresetData {
     selectedPreset: {
         presetName: string;
@@ -62,7 +68,6 @@ interface IPresetData {
         modId: number;
     }[]
 }
-//@TODO: Have settings and persistent storage working.
 let DefaultData:IPresetData = {
     selectedPreset: {
         presetName: '',
@@ -73,19 +78,34 @@ let DefaultData:IPresetData = {
     savedPresets: []
 }
 
+
+// Settings Data 
+interface ISettingsData {
+  arma3ToolsPath : string
+}
+let DefaultSettings = {
+  arma3ToolsPath : ''
+}
+
+// Create context
 const ProjectContext = 
 React.createContext<{
     presetData: typeof DefaultData
     setPresetData:React.Dispatch<React.SetStateAction<typeof DefaultData>>
+    settingsData: typeof DefaultSettings
+    setSettingsData:React.Dispatch<React.SetStateAction<typeof DefaultSettings>>
 } >({
     presetData:DefaultData,
-    setPresetData: ()=>{}
+    setPresetData: ()=>{},
+    settingsData: DefaultSettings,
+    setSettingsData: ()=>{}
 })
 
 export {
     app_constants,
     ProjectContext,
     DefaultData,
+    DefaultSettings,
     createDataFolder,
     saveDataFile,
     readDataFile

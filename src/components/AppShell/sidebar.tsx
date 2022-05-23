@@ -11,16 +11,23 @@ export default function SideBar(props: propsType) {
     views = []
   } = props;
 
+  function genButtons() {
+    return (
+      <React.Fragment>
+        {views.map((view,index)=>(
+            view.sidebarComponent ? 
+            <Route key={index} path={view.path} element={view.sidebarComponent}/>
+            :
+            <></>
+        ))}
+      </React.Fragment>
+    )
+  }
   return (
     <React.Fragment>
         <ScrollArea>
         <Routes>
-            {views.map((view,index)=>(
-                view.sidebarComponent ? 
-                <Route key={index} path={view.path} element={view.sidebarComponent}/>
-                :
-                <></>
-            ))}
+            {genButtons()}
         </Routes>
         </ScrollArea>
     </React.Fragment>        

@@ -137,17 +137,56 @@ export default function MainPage() {
       keys.forEach((key:any)=>{
         saveData[key] = formData.getInputProps(key).value
       })
-      console.log('Saving data: ',saveData)
+      //console.log('Saving data: ',saveData)
 
       //Save the data
       let currentData = JSON.parse(await readDataFile(app_constants.APP_DATA_JSON)) as typeof DefaultData 
-      currentData.savedPresets.push(saveData);
+
+      //see if new or update
+      let matchName = (saveData as typeof initialValues).presetName;
+      //let matchId = (saveData as typeof initialValues).modId;
+      const findPresetToDelete = (preset: typeof presetData.savedPresets[number]) => 
+      (preset.presetName == matchName);
+      let index = presetData.savedPresets.findIndex(findPresetToDelete)
+
+      if(index == -1 ) {
+        currentData.savedPresets.push(saveData);
+      } else {
+        currentData.savedPresets.splice(index,1,saveData)
+      }
+      
+      currentData.selectedPreset = saveData;
       saveDataFile(currentData,app_constants.APP_DATA_JSON)
       setPresetData(currentData)
 
     } catch (e) {
       console.error(e);
       saveDataFile(DefaultData,app_constants.APP_DATA_JSON) // Reset just incase?
+    }
+  }
+
+  const handleDelete = async() => {
+    let matchName = presetData.selectedPreset.presetName;
+    let matchId = presetData.selectedPreset.modId;
+    
+    const findPresetToDelete = (preset: typeof presetData.savedPresets[number]) => 
+    (preset.presetName == matchName) && (preset.modId == matchId);
+
+    let index = presetData.savedPresets.findIndex(findPresetToDelete)
+
+    if(index >= 0) {
+      let currentData = JSON.parse(await readDataFile(app_constants.APP_DATA_JSON)) as typeof DefaultData
+      currentData.savedPresets.splice(index,1)
+
+      // if(currentData.savedPresets.length > 0) {
+      //   currentData.selectedPreset = currentData.savedPresets[0]
+      // } else {
+      //   currentData.selectedPreset = DefaultData.selectedPreset //resets the form
+      // }
+      currentData.selectedPreset = DefaultData.selectedPreset //resets the form
+      saveDataFile(currentData,app_constants.APP_DATA_JSON)
+      setPresetData(currentData)
+
     }
   }
 
@@ -193,7 +232,7 @@ export default function MainPage() {
         </Center>
         <Divider my="sm" />
 
-        <Box sx={{ maxWidth: 320 }} mx="auto">
+        <Box mx="auto">
           
           <form onSubmit={formData.onSubmit(handleSubmit)} >
             {/* <LoadingOverlay visible={visible}/> */}
@@ -253,24 +292,37 @@ export default function MainPage() {
               hideControls = {true}
             />
 
+            {/* buttons */}
             <div>
-              <Group position="apart" mt="md">
-                <Group position="left" mt="md">
+              <Group position="apart" mt="xs">
+                <Group position="left" mt="xs">
                   <Button 
                     type="submit" color="yellow" variant="outline" disabled={visible}
-                    leftIcon={ visible? <Loader size="sm"/>: <></>}
+                    leftIcon={ visible? <Loader size="sm"/>: null}
+                    compact
                   >
                     Update
                   </Button>
                 </Group>
-                <Group position="right" mt="md">
+                <Group position="center" mt="xs">
                   <Button 
                     color="green" variant="outline" onClick={handleSave} disabled={visible}
-                    leftIcon={ visible? <Loader size="sm"/>: <></>}
+                    leftIcon={ visible? <Loader size="sm"/>: null}
+                    compact
                   >
                     Save Preset
                   </Button>
-              </Group>
+                </Group>
+                <Group position="right" mt="xs">
+                  <Button 
+                    color="red" variant="outline" onClick={handleDelete} disabled={visible}
+                    leftIcon={ visible? <Loader size="sm"/>: null}
+                    compact
+                  >
+                    Delete Preset
+                  </Button>
+                </Group>
+               
               </Group>
               
             </div>

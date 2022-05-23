@@ -12,7 +12,7 @@ import {
 // React stuff
 import AppShell from './components/AppShell'
 import {views} from './data/views'
-import {ProjectContext,DefaultData,saveDataFile,readDataFile,app_constants} from './data/context'
+import {ProjectContext,DefaultData,readDataFile,app_constants,DefaultSettings} from './data/context'
 
 
 export default function App() {
@@ -23,9 +23,14 @@ export default function App() {
   
   //Update the context data and pass along to children
   const [presetData, setPresetData] = useState(DefaultData);
-  const value = { presetData, setPresetData };
+  const [settingsData, setSettingsData] = useState(DefaultSettings);
+  const [globalDisableRouteButtons, setDisableRoutes] = useState(false);
+
+  //Context that is passed around
+  const value = { presetData, setPresetData,settingsData,setSettingsData };
 
   useEffect(() => {
+    // read the presets.json file
     readDataFile(app_constants.APP_DATA_JSON).then((value: string)=>{
       try {
         setPresetData(JSON.parse(value as string))
@@ -34,13 +39,22 @@ export default function App() {
         setPresetData(DefaultData)
       }
     })
+
+    // read the settings.json file
+    // readDataFile(app_constants.APP_SETTINGS_JSON).then((value: string)=>{
+    //   try {
+    //     setSettingsData(JSON.parse(value as string))
+    //   } catch (e) {
+    //     console.error(e);
+    //     setSettingsData(DefaultSettings)
+    //   }
+    // })
   },[])
 
   return (
     <React.Fragment>
 
       <ProjectContext.Provider 
-        // @ts-ignore
         value={value}
       >
       <Router>

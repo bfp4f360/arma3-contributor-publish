@@ -25,7 +25,9 @@ function GenView(): JSX.Element {
             defaultValue={presetData?.selectedPreset?.presetName || ""}
             onChange={
                 (val)=>{
+                    
                     let matched = presetData.savedPresets.find(item => {
+                        
                         return item?.presetName == val
                     })
                     if(matched) {
